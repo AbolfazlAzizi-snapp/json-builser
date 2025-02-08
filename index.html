@@ -2,133 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Landing Page JSON Builder - Advanced Drag & Drop</title>
+  <title>Landing Page JSON Builder (Nested + Dark Mode)</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- SortableJS (via CDN) -->
+  <!-- SortableJS from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
 
   <header>
-    <h1>Landing Page JSON Builder</h1>
+    <div class="header-inner">
+      <h1>Landing Page JSON Builder</h1>
+      <button id="darkModeToggle">Dark Mode</button>
+    </div>
   </header>
 
   <!-- TOP ROW: Available vs. Selected -->
   <div class="container">
-    <!-- LEFT: Available Components Panel -->
+    <!-- LEFT: Available Components -->
     <div class="panel">
       <h2>Available Components</h2>
       <div id="availableList" class="available-components">
-        <!-- We will create .available-item elements in JS -->
+        <!-- We'll populate with .available-item elements via JS -->
       </div>
     </div>
 
-    <!-- RIGHT: Selected Components Panel -->
+    <!-- RIGHT: Selected Components -->
     <div class="panel selected-panel">
       <h2>Selected Components</h2>
       <div id="selectedList" class="selected-list">
-        <!-- Items get dropped/cloned here from "availableList", can reorder -->
+        <!-- Top-level items appear here -->
       </div>
       <button id="exportBtn" class="export-btn">Export JSON</button>
     </div>
   </div>
 
-  <!-- BOTTOM #1: Form Editor (Card for each selected component) -->
+  <!-- FORM EDITOR (bottom) -->
   <div class="form-editor">
     <h2>Component Fields</h2>
     <div id="formsContainer"></div>
   </div>
 
-  <!-- BOTTOM #2: JSON Output Panel -->
+  <!-- JSON OUTPUT PANEL -->
   <div class="json-output-panel">
     <h2>JSON Output</h2>
     <pre id="jsonOutput"></pre>
   </div>
 
   <script>
-    let componentsDefs = [];      // The library from components.json
-    let selectedComponents = [];  // array of { definition, data }
+    // Dark Mode Toggle
+    const darkToggleBtn = document.getElementById('darkModeToggle');
+    darkToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      if (document.body.classList.contains('dark-mode')) {
+        darkToggleBtn.textContent = 'Light Mode';
+      } else {
+        darkToggleBtn.textContent = 'Dark Mode';
+      }
+    });
+
+    let componentsDefs = [];
+    let selectedComponents = []; // array of { definition, data, children: [] }
 
     // 1) Load components.json
     fetch('./components.json')
       .then(res => res.json())
       .then(data => {
         componentsDefs = data;
-        renderAvailableList();  // show the items in left panel
-        initSortables();        // set up drag & drop
+        renderAvailableList();   // Show items in the left panel
+        initSortableForAvailable(); // Initialize Sortable on left
+        initSortableForSelected();  // Initialize Sortable on top-level right
       })
       .catch(err => console.error('Error loading components.json:', err));
 
-    // RENDER AVAILABLE LIST
+    // RENDER LEFT LIST
     function renderAvailableList() {
       const container = document.getElementById('availableList');
       container.innerHTML = '';
-
-      // For each definition, create a div.available-item
       componentsDefs.forEach(def => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'available-item';
-        itemDiv.textContent = def.componentName;
-        // Store the name in a data attribute for identification
-        itemDiv.dataset.componentName = def.componentName;
+        const div = document.createElement('div');
+        div.className = 'available-item';
+        div.textContent = def.componentName;
+        // store the componentName in a data attr
+        div.dataset.componentName = def.componentName;
 
-        container.appendChild(itemDiv);
+        container.appendChild(div);
       });
     }
 
-    // INITIALIZE TWO LISTS (SORTABLEJS)
-    function initSortables() {
-      // Left list: 'available'
+    // INIT SORTABLE FOR LEFT LIST
+    function initSortableForAvailable() {
       new Sortable(document.getElementById('availableList'), {
         group: {
           name: 'available',
-          pull: 'clone',  // clone items when dragged out
-          put: false      // don't allow dropping items back here
+          pull: 'clone',  // cloned when dragged out
+          put: false
         },
-        sort: false, // can't reorder in the "available" list
+        sort: false,
         animation: 150
       });
+    }
 
-      // Right list: 'selected'
+    // INIT SORTABLE FOR SELECTED (TOP-LEVEL)
+    function initSortableForSelected() {
       new Sortable(document.getElementById('selectedList'), {
         group: {
           name: 'selected',
-          put: ['available', 'selected'] // accept from these lists
+          put: ['available', 'selected'] // accept from left or reorder
         },
         animation: 150,
-
-        // onAdd: item dragged from left to right
         onAdd: evt => {
-          const draggedEl = evt.item; 
-          const compName = draggedEl.dataset.componentName; 
-
-          // Find definition in componentsDefs
+          const draggedEl = evt.item;
+          const compName = draggedEl.dataset.componentName;
+          // find definition
           const def = componentsDefs.find(d => d.componentName === compName);
           if (!def) return;
 
-          // Create a fresh data object for its fields
+          // create new data object
           const dataObj = {};
-          def.fields.forEach(f => { dataObj[f.name] = ''; });
+          (def.fields || []).forEach(f => {
+            dataObj[f.name] = '';
+          });
 
-          // Insert into selectedComponents at the correct index
-          selectedComponents.splice(evt.newIndex, 0, { definition: def, data: dataObj });
+          // Insert at top-level
+          selectedComponents.splice(evt.newIndex, 0, {
+            definition: def,
+            data: dataObj,
+            children: []  // for nested items
+          });
 
-          // Re-render list & forms
           renderSelectedList();
           renderForms();
 
-          // Remove the cloned DOM element (we rely on renderSelectedList() to create standard markup)
+          // remove the cloned DOM
           draggedEl.remove();
         },
-
-        // onUpdate: user reorders items inside "selectedList"
         onUpdate: evt => {
-          const oldIndex = evt.oldIndex;
-          const newIndex = evt.newIndex;
+          const { oldIndex, newIndex } = evt;
           if (oldIndex === newIndex) return;
-
-          // Move the item in selectedComponents to match
           const movedItem = selectedComponents.splice(oldIndex, 1)[0];
           selectedComponents.splice(newIndex, 0, movedItem);
 
@@ -138,80 +149,209 @@
       });
     }
 
-    // RENDER SELECTED LIST (RIGHT PANEL)
+    // RENDER SELECTED LIST (TOP LEVEL)
     function renderSelectedList() {
-      const selContainer = document.getElementById('selectedList');
-      selContainer.innerHTML = '';
+      const selList = document.getElementById('selectedList');
+      selList.innerHTML = '';
 
       selectedComponents.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'selected-item';
 
+        // Header row (title + remove)
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'selected-header';
+
         const span = document.createElement('span');
         span.textContent = (index + 1) + ') ' + item.definition.componentName;
 
-        // Remove button
-        const btnRemove = document.createElement('button');
-        btnRemove.textContent = 'Remove';
-        btnRemove.className = 'remove-btn';
-        btnRemove.addEventListener('click', () => {
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.className = 'remove-btn';
+        removeBtn.addEventListener('click', () => {
           selectedComponents.splice(index, 1);
           renderSelectedList();
           renderForms();
         });
 
-        div.appendChild(span);
-        div.appendChild(btnRemove);
-        selContainer.appendChild(div);
+        headerDiv.appendChild(span);
+        headerDiv.appendChild(removeBtn);
+
+        // Child list container
+        const childDiv = document.createElement('div');
+        childDiv.className = 'child-list';
+        childDiv.dataset.index = index;  // so we know which parent
+
+        div.appendChild(headerDiv);
+        div.appendChild(childDiv);
+        selList.appendChild(div);
+
+        // Initialize Sortable for this child's area
+        initSortableForChild(item, childDiv);
+        // Render existing children inside this item
+        renderChildrenItems(item.children, childDiv, index);
       });
     }
 
-    // RENDER FORMS (BOTTOM)
+    // Initialize Sortable for a single item’s child-list
+    function initSortableForChild(item, childContainer) {
+      new Sortable(childContainer, {
+        group: {
+          name: `childOf-${item.definition.componentName}`,
+          put: (from, to, draggedEl) => {
+            // We'll check if parent's definition allows the dragged component
+            // from: the list where item is dragged from
+            // to: the childContainer we set up here
+            // draggedEl: the actual element
+            const compName = draggedEl.dataset.componentName;
+            return item.definition.allowedChildren
+              && item.definition.allowedChildren.includes(compName);
+          },
+          pull: ['available'] // can pull from the left if compName is allowed
+        },
+        animation: 150,
+        onAdd: evt => {
+          const draggedEl = evt.item;
+          const compName = draggedEl.dataset.componentName;
+          const def = componentsDefs.find(d => d.componentName === compName);
+          if (!def) return;
+
+          // Create data object
+          const dataObj = {};
+          (def.fields || []).forEach(f => { dataObj[f.name] = ''; });
+
+          // Add to parent's .children
+          item.children.splice(evt.newIndex, 0, {
+            definition: def,
+            data: dataObj,
+            children: []
+          });
+
+          renderSelectedList();
+          renderForms();
+
+          draggedEl.remove();
+        },
+        onUpdate: evt => {
+          const { oldIndex, newIndex } = evt;
+          if (oldIndex === newIndex) return;
+
+          const parentIndex = parseInt(childContainer.dataset.index, 10);
+          const parentItem = selectedComponents[parentIndex];
+          const moved = parentItem.children.splice(oldIndex, 1)[0];
+          parentItem.children.splice(newIndex, 0, moved);
+
+          renderSelectedList();
+          renderForms();
+        }
+      });
+    }
+
+    // Render the existing child items in a container (recursive approach if needed)
+    function renderChildrenItems(childArray, container, parentIndex) {
+      container.innerHTML = '';
+      childArray.forEach((childItem, cIndex) => {
+        const childDiv = document.createElement('div');
+        childDiv.className = 'selected-item';
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'selected-header';
+
+        const span = document.createElement('span');
+        span.textContent = (cIndex + 1) + ') ' + childItem.definition.componentName;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.className = 'remove-btn';
+        removeBtn.addEventListener('click', () => {
+          // remove from parent's children
+          selectedComponents[parentIndex].children.splice(cIndex, 1);
+          renderSelectedList();
+          renderForms();
+        });
+
+        headerDiv.appendChild(span);
+        headerDiv.appendChild(removeBtn);
+        childDiv.appendChild(headerDiv);
+
+        // Nested child container if further nesting is allowed
+        const deeperChildContainer = document.createElement('div');
+        deeperChildContainer.className = 'child-list';
+        deeperChildContainer.dataset.parentIndex = parentIndex; // track which parent's parent's index
+        childDiv.appendChild(deeperChildContainer);
+
+        container.appendChild(childDiv);
+
+        // Initialize Sortable for deeper children
+        initSortableForChild(childItem, deeperChildContainer);
+        // Render any deeper children
+        renderChildrenItems(childItem.children, deeperChildContainer, parentIndex);
+      });
+    }
+
+    // RENDER FORMS
     function renderForms() {
       const formsContainer = document.getElementById('formsContainer');
       formsContainer.innerHTML = '';
 
+      // We'll build a recursive approach for each top-level item & its children
       selectedComponents.forEach((item, idx) => {
-        const formDiv = document.createElement('div');
-        formDiv.className = 'component-form';
+        renderFormItem(item, idx, formsContainer, 0);
+      });
+    }
 
-        // Title for each component's form
-        const title = document.createElement('h3');
-        title.textContent = (idx + 1) + ') ' + item.definition.componentName + ' Fields';
-        formDiv.appendChild(title);
+    // Recursively render a component's form card (and child forms)
+    function renderFormItem(item, index, parentEl, level) {
+      const formDiv = document.createElement('div');
+      formDiv.className = 'component-form';
+      formDiv.style.marginLeft = (level * 20) + 'px'; // indent child forms if desired
 
-        // Create field inputs
-        item.definition.fields.forEach(field => {
-          const fieldGroup = document.createElement('div');
-          fieldGroup.className = 'field-group';
+      const title = document.createElement('h3');
+      title.textContent = (index + 1) + ') ' + item.definition.componentName + ' Fields';
+      formDiv.appendChild(title);
 
-          const label = document.createElement('label');
-          label.textContent = field.label;
+      // Fields
+      (item.definition.fields || []).forEach(field => {
+        const fieldGroup = document.createElement('div');
+        fieldGroup.className = 'field-group';
 
-          const input = document.createElement('input');
-          input.type = field.type || 'text';
-          input.value = item.data[field.name];
-          input.placeholder = 'Enter ' + field.label;
-          input.addEventListener('input', (e) => {
-            item.data[field.name] = e.target.value;
-          });
+        const label = document.createElement('label');
+        label.textContent = field.label;
 
-          fieldGroup.appendChild(label);
-          fieldGroup.appendChild(input);
-          formDiv.appendChild(fieldGroup);
+        const input = document.createElement('input');
+        input.type = field.type || 'text';
+        input.value = item.data[field.name];
+        input.placeholder = 'Enter ' + field.label;
+        input.addEventListener('input', e => {
+          item.data[field.name] = e.target.value;
         });
 
-        formsContainer.appendChild(formDiv);
+        fieldGroup.appendChild(label);
+        fieldGroup.appendChild(input);
+        formDiv.appendChild(fieldGroup);
+      });
+
+      parentEl.appendChild(formDiv);
+
+      // If there are children, recursively render them
+      item.children.forEach((childItem, cIndex) => {
+        renderFormItem(childItem, cIndex, parentEl, level + 1);
       });
     }
 
     // EXPORT JSON
     document.getElementById('exportBtn').addEventListener('click', () => {
-      const output = selectedComponents.map(sc => ({
-        componentName: sc.definition.componentName,
-        fields: { ...sc.data }
-      }));
-      const finalJson = { landingPage: output };
+      // We'll create a function to recursively convert items to final JSON
+      function convertItemToJson(item) {
+        return {
+          componentName: item.definition.componentName,
+          fields: { ...item.data },
+          children: item.children.map(convertItemToJson)
+        };
+      }
+
+      const finalArray = selectedComponents.map(convertItemToJson);
+      const finalJson = { landingPage: finalArray };
 
       document.getElementById('jsonOutput').textContent = JSON.stringify(finalJson, null, 2);
     });
