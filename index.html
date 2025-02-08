@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Landing Page JSON Builder - FAQ Under FAQ + Dark Mode</title>
+  <title>Landing Page JSON Builder - FAQ Under FAQ + Dark Mode + Copy</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Load SortableJS -->
+  <!-- SortableJS from a CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
@@ -46,6 +46,12 @@
   <!-- Bottom #2: JSON Output -->
   <div class="json-output-panel">
     <h2>JSON Output</h2>
+
+    <!-- Copy button for raw JSON text -->
+    <button id="copyJsonBtn" class="export-btn" style="margin-bottom: 1rem;">
+      Copy JSON
+    </button>
+
     <pre id="jsonOutput"></pre>
   </div>
 
@@ -59,11 +65,11 @@
         : 'Dark Mode';
     });
 
-    // Global Data
-    let componentsDefs = []; // from components.json
-    let selectedItems = [];  // array of { compName, data, list (for FAQ), isFAQ: boolean }
+    // Data
+    let componentsDefs = [];
+    let selectedItems = []; // array of item objects
 
-    // 1) Load components.json
+    // Load components.json
     fetch('./components.json')
       .then(res => res.json())
       .then(data => {
@@ -87,12 +93,12 @@
       });
     }
 
-    // INIT SORTABLE FOR LEFT (Available)
+    // INIT SORTABLE FOR LEFT
     function initSortableLeft() {
       new Sortable(document.getElementById('availableList'), {
         group: {
           name: 'available',
-          pull: 'clone',  // clone out
+          pull: 'clone',
           put: false
         },
         sort: false,
@@ -100,15 +106,14 @@
       });
     }
 
-    // INIT SORTABLE FOR RIGHT (Top-level)
+    // INIT SORTABLE FOR RIGHT
     function initSortableRight() {
       new Sortable(document.getElementById('selectedList'), {
         group: {
           name: 'selected',
-          put: ['available', 'faq-child', 'selected'] // accept from left or reorder
+          put: ['available', 'faq-child', 'selected']
         },
         animation: 150,
-
         onAdd: (evt) => {
           const draggedEl = evt.item;
           const compName = draggedEl.dataset.componentName;
@@ -116,15 +121,13 @@
           if (!def) return;
 
           const newObj = createDataObject(def);
-
-          // Insert into top-level array
           selectedItems.splice(evt.newIndex, 0, newObj);
+
           renderSelectedList();
           renderForms();
 
-          draggedEl.remove(); // remove cloned DOM
+          draggedEl.remove();
         },
-
         onUpdate: (evt) => {
           const { oldIndex, newIndex } = evt;
           if (oldIndex === newIndex) return;
@@ -137,38 +140,38 @@
       });
     }
 
-    // Get definition object by componentName
+    // HELPER: get definition by name
     function getDef(name) {
       return componentsDefs.find(d => d.componentName === name);
     }
 
-    // Create data object for a new item
-    // If it's "faq", we store `list: []` to hold multiple Q/A items
+    // Create data object for an item
     function createDataObject(def) {
       const dataObj = {};
-      (def.fields || []).forEach(f => { dataObj[f.name] = ''; });
+      (def.fields || []).forEach(f => {
+        dataObj[f.name] = '';
+      });
       return {
         componentName: def.componentName,
         title: def.title || def.componentName,
         data: dataObj,
-        list: [], // For "faq" items, we store Q/A children here
-        arrayKey: def.arrayKey || null,        // e.g. "list" for FAQ
+        list: [],
+        arrayKey: def.arrayKey || null,
         allowedChildType: def.allowedChildType || null
       };
     }
 
-    // RENDER SELECTED LIST (TOP LEVEL)
+    // RENDER SELECTED LIST
     function renderSelectedList() {
       const selContainer = document.getElementById('selectedList');
       selContainer.innerHTML = '';
 
       selectedItems.forEach((item, index) => {
-        // Each item
         const itemDiv = document.createElement('div');
         itemDiv.className = 'selected-item';
         itemDiv.dataset.index = index;
 
-        // Header: title + remove
+        // Header
         const header = document.createElement('div');
         header.className = 'selected-header';
 
@@ -187,20 +190,17 @@
 
         header.appendChild(span);
         header.appendChild(removeBtn);
+
         itemDiv.appendChild(header);
 
-        // If it's an FAQ container, add a child-list area
-        if (item.arrayKey) {
-          // create a .child-list container
+        // If it's an FAQ container
+        if (item.arrayKey === 'list') {
           const childListDiv = document.createElement('div');
           childListDiv.className = 'child-list';
-          childListDiv.dataset.index = index; // so we know which FAQ
-
+          childListDiv.dataset.index = index;
           itemDiv.appendChild(childListDiv);
 
-          // Sortable for the FAQ's child area
           initFAQChildSortable(childListDiv, item);
-          // Render existing Q/A (list) as sub-items
           renderChildItems(item.list, childListDiv, index);
         }
 
@@ -208,13 +208,13 @@
       });
     }
 
-    // Initialize Sortable for FAQ child zone
+    // Initialize Sortable for FAQ child area
     function initFAQChildSortable(childListDiv, parentItem) {
       new Sortable(childListDiv, {
         group: {
           name: 'faq-child',
-          put: ['available'], // can drop from the left
-          pull: false         // don't drag out from here
+          put: ['available'], // can drop from left
+          pull: false
         },
         animation: 150,
         onAdd: (evt) => {
@@ -223,19 +223,15 @@
           const def = getDef(compName);
           if (!def) return;
 
-          // Ensure the parent's 'allowedChildType' matches this compName
+          // Only accept child if parent's allowedChildType matches
           if (parentItem.allowedChildType !== compName) {
-            // If you want to block or revert the drop, do so here:
-            // e.g., childListDiv.removeChild(draggedEl);
-            // or just do nothing. We'll remove the draggedEl anyway.
             draggedEl.remove();
-            alert(`This FAQ only accepts '${parentItem.allowedChildType}', not '${compName}'.`);
+            alert(`This container accepts '${parentItem.allowedChildType}', not '${compName}'.`);
             return;
           }
 
-          // Create Q/A item
+          // Add new Q/A item
           const childObj = createDataObject(def);
-          // Append to parent's list
           parentItem.list.splice(evt.newIndex, 0, childObj);
 
           renderSelectedList();
@@ -246,22 +242,20 @@
       });
     }
 
-    // RENDER CHILD ITEMS (Q/A) INSIDE THE FAQ
+    // Render existing Q/A in childList
     function renderChildItems(listArray, container, parentIndex) {
-      container.innerHTML = ''; // clear first
-
+      container.innerHTML = '';
       listArray.forEach((faqItem, cIndex) => {
-        // Each Q/A
         const subDiv = document.createElement('div');
-        subDiv.className = 'selected-item'; 
-        subDiv.style.cursor = 'default'; // no reordering child items in this example
+        subDiv.className = 'selected-item';
+        subDiv.style.cursor = 'default';
 
         const header = document.createElement('div');
         header.className = 'selected-header';
 
-        const span = document.createElement('span');
-        span.className = 'title';
-        span.textContent = (cIndex + 1) + ') ' + faqItem.title;
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'title';
+        titleSpan.textContent = (cIndex + 1) + ') ' + faqItem.title;
 
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
@@ -272,7 +266,7 @@
           renderForms();
         });
 
-        header.appendChild(span);
+        header.appendChild(titleSpan);
         header.appendChild(removeBtn);
         subDiv.appendChild(header);
 
@@ -280,36 +274,33 @@
       });
     }
 
-    // RENDER FORMS (Card-style)
+    // RENDER FORMS
     function renderForms() {
       const formsContainer = document.getElementById('formsContainer');
       formsContainer.innerHTML = '';
 
-      // For each top-level item
       selectedItems.forEach((item, idx) => {
-        renderFormItem(item, idx, formsContainer);
+        renderFormItem(item, idx, formsContainer, 0);
 
-        // If it's FAQ, also render forms for each Q/A in item.list
-        if (item.arrayKey && item.arrayKey === 'list') {
+        // If it's FAQ, also show each Q/A
+        if (item.arrayKey === 'list') {
           item.list.forEach((childObj, cIndex) => {
-            renderFormItem(childObj, cIndex, formsContainer, /*indent*/ 1);
+            renderFormItem(childObj, cIndex, formsContainer, 1);
           });
         }
       });
     }
 
-    // A function to render a single "component" form
+    // Render form for an item
     function renderFormItem(item, index, parentEl, indentLevel = 0) {
       const formDiv = document.createElement('div');
       formDiv.className = 'component-form';
-      // Optional indentation for child forms
       formDiv.style.marginLeft = (indentLevel * 20) + 'px';
 
       const title = document.createElement('h3');
       title.textContent = (index + 1) + ') ' + item.title + ' Fields';
       formDiv.appendChild(title);
 
-      // Build fields
       const def = getDef(item.componentName);
       if (def && def.fields) {
         def.fields.forEach(field => {
@@ -338,59 +329,55 @@
 
     // EXPORT JSON
     document.getElementById('exportBtn').addEventListener('click', () => {
-      // We transform each top-level item into final JSON
       const finalArray = selectedItems.map(item => convertToFinalJson(item));
-
-      // Example final root object
-      // If item.componentName = 'faq', we produce an object like:
-      // {
-      //   "type": "FAQ",
-      //   "list": [ ... ]
-      // }
-      // If it's "pricing-table", etc., handle differently.
       const finalOutput = { landingPage: finalArray };
 
       document.getElementById('jsonOutput').textContent = JSON.stringify(finalOutput, null, 2);
     });
 
-    // Convert an item to final JSON structure
+    // Convert item to final JSON
     function convertToFinalJson(item) {
       const def = getDef(item.componentName);
       if (!def) return {};
 
-      // If item is "faq":
+      // If 'faq' container
       if (item.arrayKey === 'list') {
-        // We'll produce an object with "type": "FAQ" (or item.componentName),
-        // plus "list": an array of Q/A objects
-        // The item.data is likely empty for the parent FAQ container
-        // The real Q/A data is in item.list
-        const listArray = item.list.map(q => {
-          // Each "faq-item" has question/answer in q.data
-          return {
-            question: q.data['question'] || '',
-            answer:   q.data['answer']   || ''
-          };
-        });
+        const qList = item.list.map(q => ({
+          question: q.data.question || '',
+          answer:   q.data.answer   || ''
+        }));
         return {
-          type: "FAQ",          // or item.componentName.toUpperCase()
-          list: listArray
+          type: "FAQ",
+          list: qList
         };
-      } else if (item.componentName === 'pricing-table') {
-        // example: build a custom structure
+      }
+      // Example if it's "pricing-table"
+      else if (item.componentName === 'pricing-table') {
         return {
           type: "PRICING_TABLE",
           title: item.data.title,
-          plan1Name:  item.data.plan1Name,
+          plan1Name: item.data.plan1Name,
           plan1Price: item.data.plan1Price
         };
-      } else {
-        // fallback for other components
-        return {
-          type: (item.componentName || "UNKNOWN"),
-          ...item.data
-        };
       }
+      // Fallback for other components
+      return {
+        type: (item.componentName || "UNKNOWN"),
+        ...item.data
+      };
     }
+
+    // COPY JSON
+    document.getElementById('copyJsonBtn').addEventListener('click', () => {
+      const jsonText = document.getElementById('jsonOutput').textContent;
+      navigator.clipboard.writeText(jsonText)
+        .then(() => {
+          alert('JSON copied to clipboard!');
+        })
+        .catch(err => {
+          console.error('Failed to copy JSON: ', err);
+        });
+    });
   </script>
 </body>
 </html>
