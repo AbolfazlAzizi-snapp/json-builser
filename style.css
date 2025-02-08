@@ -113,6 +113,32 @@ header h1 {
   font-weight: 600;
 }
 
+/* -------------------------
+   SEARCH BOX (NEW)
+-------------------------- */
+.search-container {
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+.search-container input {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-container input::placeholder {
+  color: #999;
+}
+.search-container input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
 /* AVAILABLE COMPONENTS (LEFT) */
 .available-components {
   display: flex;
