@@ -1,10 +1,10 @@
 [
   {
-    "componentName": "hero-section",
+    "componentName": "faq",
+    "allowedChildren": ["faq"],
     "fields": [
-      { "name": "title", "label": "Hero Title", "type": "text" },
-      { "name": "subtitle", "label": "Hero Subtitle", "type": "text" },
-      { "name": "backgroundImage", "label": "Background Image URL", "type": "text" }
+      { "name": "question", "label": "Question", "type": "text" },
+      { "name": "answer", "label": "Answer", "type": "text" }
     ]
   },
   {
@@ -16,19 +16,10 @@
     ]
   },
   {
-    "componentName": "testimonial-slider",
+    "componentName": "call-to-action",
     "fields": [
-      { "name": "title", "label": "Slider Title", "type": "text" },
-      { "name": "slide1Text", "label": "Slide #1 Text", "type": "text" },
-      { "name": "slide2Text", "label": "Slide #2 Text", "type": "text" }
-    ]
-  },
-  {
-    "componentName": "image-text-block",
-    "fields": [
-      { "name": "heading", "label": "Block Heading", "type": "text" },
-      { "name": "imageUrl", "label": "Image URL", "type": "text" },
-      { "name": "bodyText", "label": "Body Text", "type": "text" }
+      { "name": "ctaText", "label": "CTA Text", "type": "text" },
+      { "name": "ctaLink", "label": "CTA Link", "type": "text" }
     ]
   }
 ]
