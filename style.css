@@ -1,54 +1,111 @@
 /* ---------------------
-   GLOBAL STYLES
+   GLOBAL STYLES & COLOR VARIABLES
 ---------------------- */
+
+/* LIGHT MODE: default */
+:root {
+  --header-bg: #6366f1;      /* Indigo for header */
+  --header-text: #fff;
+  --page-bg: #f8f9fb;        /* Overall page background */
+  --panel-bg: #fff;
+  --panel-border: #e5e7eb;
+  --panel-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --text-color: #2e2e2e;
+  --secondary-text: #4b5563; /* For slightly muted text */
+  --label-color: #374151;
+  --input-bg: #fff;
+  --input-border: #d1d5db;
+  --accent-color: #6366f1;   /* Indigo accent */
+  --accent-hover: #4f46e5;   /* Darker Indigo */
+  --focus-ring: rgba(99,102,241,0.15); /* for input focus shadow */
+  --json-bg: #fafafa;
+}
+
+/* DARK MODE OVERRIDES */
+.dark-mode {
+  --header-bg: #3f3d56;       /* a deeper purple/gray for header */
+  --header-text: #fafafa;
+  --page-bg: #1e1e2f;         /* overall background in dark mode */
+  --panel-bg: #2c2c3f;
+  --panel-border: #3c3c52;
+  --panel-shadow: none;       /* or a more subtle shadow in dark mode */
+  --text-color: #e6e6eb;
+  --secondary-text: #b2b2c6;
+  --label-color: #d8d8e4;
+  --input-bg: #3a3a54;
+  --input-border: #5f5f7a;
+  --accent-color: #8b5cf6;    /* a lighter purple accent for dark mode */
+  --accent-hover: #7c3aed;
+  --focus-ring: rgba(139,92,246,0.25);
+  --json-bg: #2e2e44;
+}
+
+/* Reset body & use CSS variables for BG/Text */
 * {
   box-sizing: border-box;
-  margin: 0;
+  margin: 0; 
   padding: 0;
 }
-
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
-               "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", 
-               "Segoe UI Emoji", "Segoe UI Symbol";
-  background-color: #f8f9fb;
-  color: #2e2e2e;
+               "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--page-bg);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
+/* HEADERS / TEXT */
 h1, h2, h3 {
-  color: #2e2e2e;
+  color: var(--text-color);
 }
 
+/* LINKS & BUTTONS RESET */
 a, button {
   cursor: pointer;
   outline: none;
   border: none;
+  background: none;
   font-family: inherit;
 }
-
 button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-/* ---------------------
-   HEADER
----------------------- */
+/* HEADER */
 header {
-  background-color: #6366F1; /* Indigo */
+  background-color: var(--header-bg);
+  color: var(--header-text);
   padding: 1rem;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+header .header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1300px;
+  margin: 0 auto;
 }
 header h1 {
-  color: #fff;
   font-size: 1.8rem;
   font-weight: 600;
+  margin: 0;
+}
+#darkModeToggle {
+  background-color: var(--accent-color);
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+#darkModeToggle:hover {
+  background-color: var(--accent-hover);
 }
 
-/* ---------------------
-   MAIN CONTAINER
----------------------- */
+/* --- MAIN CONTAINER (TOP ROW) --- */
 .container {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -58,68 +115,64 @@ header h1 {
   padding: 1.5rem;
 }
 
-/* ---------------------
-   PANEL (generic box)
----------------------- */
+/* PANELS */
 .panel {
-  background-color: #ffffff;
+  background-color: var(--panel-bg);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
   padding: 1rem;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
-
 .panel h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
   font-weight: 600;
-  color: #2e2e2e;
 }
 
-/* ---------------------
-   AVAILABLE COMPONENTS
----------------------- */
+/* AVAILABLE COMPONENTS */
 .available-components {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 .available-components button {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   text-align: left;
   font-size: 0.95rem;
+  color: var(--text-color);
   transition: background 0.2s, box-shadow 0.2s;
 }
 .available-components button:hover {
-  background: #f1f1f1;
+  background-color: #f1f1f1; /* This might be less visible in dark mode. 
+                                You could do a separate .dark-mode override 
+                                if you want a different hover for dark mode. */
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
+.dark-mode .available-components button:hover {
+  background-color: #4b4b62; /* A darker hover in dark mode */
+}
 
-/* ---------------------
-   SELECTED COMPONENTS
----------------------- */
+/* SELECTED COMPONENTS */
 .selected-panel {
   display: flex;
   flex-direction: column;
   height: auto;
 }
-
 .selected-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   flex: 1;
 }
-
-/* Each item in the "Selected Components" list */
 .selected-item {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   padding: 0.75rem;
@@ -131,36 +184,34 @@ header h1 {
 .selected-item:hover {
   box-shadow: 0 2px 5px rgba(0,0,0,0.07);
 }
-
 .selected-item span {
   font-weight: 500;
-  color: #4b5563; /* Gray-700 */
+  color: var(--secondary-text);
 }
-
 .actions {
   display: flex;
   gap: 0.25rem;
 }
 .actions button {
-  background: #fff;
-  border: 1px solid #d1d5db; /* Gray-300 */
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
-  color: #4b5563;
+  color: var(--text-color);
   transition: background 0.2s;
 }
 .actions button:hover {
-  background: #e5e7eb; /* Slight highlight */
+  background-color: #e5e7eb; 
+}
+.dark-mode .actions button:hover {
+  background-color: #4b4b62;
 }
 
-/* ---------------------
-   EXPORT BUTTON
----------------------- */
+/* EXPORT BUTTON */
 .export-btn {
-  background-color: #6366F1; /* Indigo */
+  background-color: var(--accent-color);
   color: #fff;
-  border: none;
   padding: 0.7rem 1.2rem;
   border-radius: 6px;
   cursor: pointer;
@@ -169,33 +220,34 @@ header h1 {
   text-transform: uppercase;
   margin-top: 1rem;
   align-self: flex-start;
-  transition: background 0.2s;
+  transition: background-color 0.2s;
 }
 .export-btn:hover {
-  background-color: #4f46e5; /* Darker Indigo */
+  background-color: var(--accent-hover);
 }
 
-/* ---------------------
-   FORM EDITOR AREA
----------------------- */
+/* --- FORM EDITOR (BOTTOM) --- */
 .form-editor {
-  /* No border or background so each component form looks separate */
-  grid-column: 1 / span 2;
+  max-width: 1300px;
+  margin: 0 auto;
   margin-top: 1rem;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: var(--panel-shadow);
+  padding: 1.5rem;
+  transition: background-color 0.3s, border-color 0.3s;
 }
-
 .form-editor h2 {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   margin-bottom: 1rem;
-  color: #2e2e2e;
   font-weight: 600;
-  padding-left: 0.25rem;
 }
 
-/* Each component's card */
+/* Each component's form card */
 .component-form {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -210,10 +262,10 @@ header h1 {
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--secondary-text);
 }
 
-/* Field group: label+input in a 1/3, 2/3 ratio grid */
+/* Field group: label+input in columns */
 .field-group {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -222,32 +274,48 @@ header h1 {
 }
 .field-group label {
   font-weight: 500;
-  color: #374151;
+  color: var(--label-color);
   align-self: center;
   margin-left: 0.25rem;
 }
 .field-group input[type="text"] {
-  padding: 0.6rem;
-  border: 1px solid #d1d5db;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 4px;
   font-size: 0.95rem;
-  color: #374151;
+  color: var(--text-color);
+  padding: 0.6rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .field-group input[type="text"]:focus {
-  border-color: #6366F1; /* Indigo */
-  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
-/* Display final JSON, if wanted */
+/* --- JSON OUTPUT PANEL (BOTTOM) --- */
+.json-output-panel {
+  max-width: 1300px;
+  margin: 1rem auto;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: var(--panel-shadow);
+  padding: 1.5rem;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+.json-output-panel h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
 #jsonOutput {
   width: 100%;
-  margin-top: 1rem;
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 1rem;
   font-family: monospace;
   min-height: 120px;
   white-space: pre-wrap;
-  background: #fafafa;
+  background: var(--json-bg);
+  color: var(--text-color);
 }
