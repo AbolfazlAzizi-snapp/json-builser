@@ -39,7 +39,7 @@
   --json-bg: #2e2e44;
 }
 
-/* Reset & Body */
+/* Reset & Base */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -113,7 +113,7 @@ header h1 {
   font-weight: 600;
 }
 
-/* AVAILABLE LIST (LEFT) */
+/* AVAILABLE COMPONENTS (LEFT) */
 .available-components {
   display: flex;
   flex-direction: column;
@@ -137,7 +137,7 @@ header h1 {
   background-color: #4b4b62;
 }
 
-/* SELECTED LIST (RIGHT) */
+/* SELECTED COMPONENTS (RIGHT) */
 .selected-panel {
   display: flex;
   flex-direction: column;
@@ -148,8 +148,6 @@ header h1 {
   gap: 0.5rem;
   min-height: 50px;
 }
-
-/* Each selected item (FAQ container or other) */
 .selected-item {
   background-color: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -190,7 +188,7 @@ header h1 {
   background-color: #4b4b62;
 }
 
-/* Child zone inside an FAQ container (if needed) */
+/* Child zone inside an FAQ container */
 .child-list {
   margin-left: 1rem;
   border-left: 2px dashed var(--input-border);
@@ -216,7 +214,7 @@ header h1 {
   background-color: var(--accent-hover);
 }
 
-/* FORM EDITOR */
+/* FORM EDITOR (Bottom) */
 .form-editor {
   max-width: 1300px;
   margin: 0 auto;
@@ -253,7 +251,7 @@ header h1 {
   color: var(--secondary-text);
 }
 
-/* Label & Input in columns */
+/* Field group: label & input in columns */
 .field-group {
   display: grid;
   grid-template-columns: 1fr 2fr;
