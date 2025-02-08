@@ -1,18 +1,34 @@
 [
-    {
-      "componentName": "hero-section",
-      "fields": [
-        { "name": "title", "label": "Hero Title", "type": "text" },
-        { "name": "subtitle", "label": "Hero Subtitle", "type": "text" }
-      ]
-    },
-    {
-      "componentName": "pricing-table",
-      "fields": [
-        { "name": "title", "label": "Pricing Table Title", "type": "text" },
-        { "name": "plan1Name", "label": "Plan #1 Name", "type": "text" },
-        { "name": "plan1Price", "label": "Plan #1 Price", "type": "text" }
-      ]
-    }
-  ]
-  
+  {
+    "componentName": "hero-section",
+    "fields": [
+      { "name": "title", "label": "Hero Title", "type": "text" },
+      { "name": "subtitle", "label": "Hero Subtitle", "type": "text" },
+      { "name": "backgroundImage", "label": "Background Image URL", "type": "text" }
+    ]
+  },
+  {
+    "componentName": "pricing-table",
+    "fields": [
+      { "name": "title", "label": "Table Title", "type": "text" },
+      { "name": "plan1Name", "label": "Plan #1 Name", "type": "text" },
+      { "name": "plan1Price", "label": "Plan #1 Price", "type": "text" }
+    ]
+  },
+  {
+    "componentName": "testimonial-slider",
+    "fields": [
+      { "name": "title", "label": "Slider Title", "type": "text" },
+      { "name": "slide1Text", "label": "Slide #1 Text", "type": "text" },
+      { "name": "slide2Text", "label": "Slide #2 Text", "type": "text" }
+    ]
+  },
+  {
+    "componentName": "image-text-block",
+    "fields": [
+      { "name": "heading", "label": "Block Heading", "type": "text" },
+      { "name": "imageUrl", "label": "Image URL", "type": "text" },
+      { "name": "bodyText", "label": "Body Text", "type": "text" }
+    ]
+  }
+]
