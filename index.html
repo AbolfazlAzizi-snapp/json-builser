@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Landing Page Builder</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1>Landing Page Builder</h1>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar: Available Components -->
+    <aside class="sidebar">
+      <h2>Available Components</h2>
+      <div id="available-components">
+        <!-- Will be dynamically populated by script.js -->
+      </div>
+    </aside>
+
+    <!-- Main Area: Form Editor + Preview -->
+    <main class="main-area">
+      <section id="form-section" class="form-section">
+        <h2>Component Fields</h2>
+        <div id="form-editor">
+          <!-- Fields for the selected component appear here -->
+        </div>
+        <button id="btn-generate">Generate JSON</button>
+      </section>
+
+      <section class="output-section">
+        <h2>JSON Output</h2>
+        <textarea id="json-output" readonly rows="10"></textarea>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+[
+    {
+      "componentName": "hero-section",
+      "fields": [
+        { "name": "title", "label": "Hero Title", "type": "text" },
+        { "name": "subtitle", "label": "Hero Subtitle", "type": "text" }
+      ]
+    },
+    {
+      "componentName": "pricing-table",
+      "fields": [
+        { "name": "title", "label": "Pricing Table Title", "type": "text" },
+        { "name": "plan1Name", "label": "Plan #1 Name", "type": "text" },
+        { "name": "plan1Price", "label": "Plan #1 Price", "type": "text" }
+      ]
+    }
+  ]
+  
