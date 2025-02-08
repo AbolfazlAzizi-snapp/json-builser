@@ -31,21 +31,29 @@
   </div>
 
   <!-- FORM EDITOR (spans both columns) -->
-  <div id="formEditor" class="form-editor">
+  <div class="form-editor" id="formEditor">
     <h2>Component Fields</h2>
-    <!-- Each selected component's form will appear here -->
     <div id="formsContainer"></div>
-    
-    <!-- (Optional) Show final JSON output here, or use a popup. -->
+
+    <!-- Optional: Show final JSON output here when user clicks Export -->
     <pre id="jsonOutput"></pre>
   </div>
 
   <script>
-    // Global data
-    let componentsDefs = [];
-    let selectedComponents = []; // array of { definition: {componentName, fields[]}, data: {} }
+    /* 
+      Vanilla JS for:
+      1. Fetching 'components.json'
+      2. Rendering 'Available Components' as buttons
+      3. Letting user add multiple selected components
+      4. Reordering them (up/down)
+      5. Dynamically building form inputs
+      6. Exporting final JSON
+    */
 
-    // Fetch the component definitions from 'components.json'
+    let componentsDefs = [];
+    let selectedComponents = []; // e.g. [{ definition, data }, ...]
+
+    // 1. Load the component definitions
     fetch('./components.json')
       .then(res => res.json())
       .then(data => {
@@ -54,9 +62,7 @@
       })
       .catch(err => console.error('Error loading components.json:', err));
 
-    // -------------------------
-    // RENDER AVAILABLE COMPONENTS
-    // -------------------------
+    // Render "Available Components" as buttons
     function renderAvailableComponents() {
       const container = document.getElementById('availableComponents');
       container.innerHTML = '';
@@ -69,25 +75,19 @@
       });
     }
 
-    // -------------------------
-    // ADD COMPONENT TO SELECTED LIST
-    // -------------------------
+    // Add a component to the selected list
     function addComponent(def) {
-      // Initialize empty data object for fields
       const dataObj = {};
       def.fields.forEach(f => {
-        dataObj[f.name] = '';
+        dataObj[f.name] = ''; // default blank
       });
 
-      // Store in selectedComponents
       selectedComponents.push({ definition: def, data: dataObj });
       renderSelectedList();
       renderForms();
     }
 
-    // -------------------------
-    // RENDER SELECTED COMPONENTS LIST
-    // -------------------------
+    // Render the "Selected Components" list (right panel)
     function renderSelectedList() {
       const listEl = document.getElementById('selectedList');
       listEl.innerHTML = '';
@@ -96,25 +96,25 @@
         const div = document.createElement('div');
         div.className = 'selected-item';
 
-        // Label with index + component name
+        // Label: e.g., "1) hero-section"
         const span = document.createElement('span');
         span.textContent = (index + 1) + ') ' + item.definition.componentName;
 
-        // Up/Down/Remove
+        // Action buttons (Up, Down, Remove)
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'actions';
 
         // Move Up
         const btnUp = document.createElement('button');
         btnUp.textContent = '↑';
-        btnUp.disabled = (index === 0); // Can't move up if first
+        btnUp.disabled = (index === 0);
         btnUp.addEventListener('click', () => moveComponentUp(index));
         actionsDiv.appendChild(btnUp);
 
         // Move Down
         const btnDown = document.createElement('button');
         btnDown.textContent = '↓';
-        btnDown.disabled = (index === selectedComponents.length - 1); // Can't move down if last
+        btnDown.disabled = (index === selectedComponents.length - 1);
         btnDown.addEventListener('click', () => moveComponentDown(index));
         actionsDiv.appendChild(btnDown);
 
@@ -126,14 +126,12 @@
 
         div.appendChild(span);
         div.appendChild(actionsDiv);
-
         listEl.appendChild(div);
       });
     }
 
-    // Move item up
     function moveComponentUp(index) {
-      if (index === 0) return; 
+      if (index === 0) return;
       const temp = selectedComponents[index];
       selectedComponents[index] = selectedComponents[index - 1];
       selectedComponents[index - 1] = temp;
@@ -141,7 +139,6 @@
       renderForms();
     }
 
-    // Move item down
     function moveComponentDown(index) {
       if (index === selectedComponents.length - 1) return;
       const temp = selectedComponents[index];
@@ -151,47 +148,44 @@
       renderForms();
     }
 
-    // Remove item
     function removeComponent(index) {
       selectedComponents.splice(index, 1);
       renderSelectedList();
       renderForms();
     }
 
-    // -------------------------
-    // RENDER FORM EDITOR
-    // -------------------------
+    // Render the form fields for each selected component
     function renderForms() {
       const container = document.getElementById('formsContainer');
       container.innerHTML = '';
 
       selectedComponents.forEach((item, idx) => {
-        // item.definition, item.data
+        // Card container
         const formDiv = document.createElement('div');
         formDiv.className = 'component-form';
 
+        // Title: e.g., "1) hero-section Fields"
         const title = document.createElement('h3');
         title.textContent = (idx + 1) + ') ' + item.definition.componentName + ' Fields';
         formDiv.appendChild(title);
 
-        // For each field in definition
+        // For each field in the component definition
         item.definition.fields.forEach(field => {
           const fieldGroup = document.createElement('div');
           fieldGroup.className = 'field-group';
 
           const label = document.createElement('label');
           label.textContent = field.label;
-          fieldGroup.appendChild(label);
 
           const input = document.createElement('input');
           input.type = field.type || 'text';
           input.value = item.data[field.name];
           input.placeholder = 'Enter ' + field.label;
           input.addEventListener('input', (e) => {
-            // Update the data in selectedComponents
             item.data[field.name] = e.target.value;
           });
 
+          fieldGroup.appendChild(label);
           fieldGroup.appendChild(input);
           formDiv.appendChild(fieldGroup);
         });
@@ -200,29 +194,21 @@
       });
     }
 
-    // -------------------------
     // EXPORT JSON
-    // -------------------------
     document.getElementById('exportBtn').addEventListener('click', () => {
-      // Build final JSON array of components, preserving order
+      // Build final JSON array
       const outputArray = selectedComponents.map(item => ({
         componentName: item.definition.componentName,
         fields: { ...item.data }
       }));
 
-      // For demonstration, let's put it in an object
-      const finalJson = {
-        landingPage: outputArray
-      };
+      // Example final structure
+      const finalJson = { landingPage: outputArray };
 
-      // Display in a <pre> or console
+      // Show in <pre> block
       const outputEl = document.getElementById('jsonOutput');
       outputEl.textContent = JSON.stringify(finalJson, null, 2);
-
-      // Alternatively, could copy to clipboard or show in a modal
-      // console.log(finalJson);
     });
   </script>
-
 </body>
 </html>
