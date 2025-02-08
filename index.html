@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Landing Page JSON Builder - FAQ + Dark Mode + Copy + Search</title>
+  <title>Landing Page JSON Builder - FAQ + Dark Mode + Copy + Autocomplete</title>
   <link rel="stylesheet" href="style.css" />
 
   <!-- SortableJS from a CDN -->
@@ -24,7 +24,7 @@
     <div class="panel">
       <h2>Available Components</h2>
 
-      <!-- New minimal "cute" search box -->
+      <!-- Search Box + Suggestions -->
       <div class="search-container">
         <input 
           type="text" 
@@ -32,6 +32,9 @@
           placeholder="Search components..." 
           oninput="handleSearch()" 
         />
+        <div class="search-suggestions" id="searchSuggestions">
+          <!-- suggestions <ul><li> appended here -->
+        </div>
       </div>
 
       <div id="availableList" class="available-components">
@@ -82,40 +85,74 @@
     let componentsDefs = [];
     let selectedItems = []; // array of item objects
 
-    // For search
-    let filterTerm = '';
+    let filterTerm = ''; // for filtering available items
 
     // 1) Load components.json
     fetch('./components.json')
       .then(res => res.json())
       .then(data => {
         componentsDefs = data;
-        renderAvailableList();    // Render full list initially
+        renderAvailableList();    // Render full list
         initSortableLeft();
         initSortableRight();
       })
       .catch(err => console.error('Error loading components.json:', err));
 
-    // -----------------------------
-    // SEARCH HANDLER (NEW)
-    // -----------------------------
+    // ------------
+    // ADV. SEARCH (AUTOCOMPLETE)
+    // ------------
     function handleSearch() {
-      filterTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-      renderAvailableList(); // re-render with the filter
-    }
+      const inputEl = document.getElementById('searchInput');
+      filterTerm = inputEl.value.trim().toLowerCase();
 
-    // RENDER LEFT LIST (with filtering)
-    function renderAvailableList() {
-      const container = document.getElementById('availableList');
-      container.innerHTML = '';
+      // 1) Filter the available list
+      renderAvailableList();
 
-      // Filter by 'filterTerm'
+      // 2) Show suggestions (max 5)
+      const suggestionsEl = document.getElementById('searchSuggestions');
       const filtered = componentsDefs.filter(def => {
         const text = (def.title || def.componentName).toLowerCase();
         return text.includes(filterTerm);
       });
 
-      // Then render
+      if (!filterTerm || filtered.length === 0) {
+        suggestionsEl.style.display = 'none'; // hide if empty or no filter
+        suggestionsEl.innerHTML = '';
+        return;
+      }
+
+      // Build <ul> of suggestions
+      let maxSuggestions = 5;
+      const ul = document.createElement('ul');
+      filtered.slice(0, maxSuggestions).forEach(def => {
+        const li = document.createElement('li');
+        li.textContent = def.title || def.componentName;
+        // On click: fill the input, hide suggestions, re-filter
+        li.addEventListener('click', () => {
+          inputEl.value = def.title || def.componentName;
+          filterTerm = inputEl.value.toLowerCase();
+          suggestionsEl.style.display = 'none';
+          suggestionsEl.innerHTML = '';
+          renderAvailableList(); // re-filter with the chosen suggestion
+        });
+        ul.appendChild(li);
+      });
+
+      suggestionsEl.innerHTML = '';
+      suggestionsEl.appendChild(ul);
+      suggestionsEl.style.display = 'block';
+    }
+
+    // RENDER AVAILABLE LIST (with filterTerm)
+    function renderAvailableList() {
+      const container = document.getElementById('availableList');
+      container.innerHTML = '';
+
+      const filtered = componentsDefs.filter(def => {
+        const text = (def.title || def.componentName).toLowerCase();
+        return text.includes(filterTerm);
+      });
+
       filtered.forEach(def => {
         const div = document.createElement('div');
         div.className = 'available-item';
