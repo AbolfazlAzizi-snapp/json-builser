@@ -1,37 +1,102 @@
-/* --------------------------------------------------
-   GLOBAL RESET & BASE
---------------------------------------------------- */
+/* ----------------------------------
+   CSS VARIABLES FOR LIGHT & DARK
+----------------------------------- */
+/* Default (Light Mode) */
+:root {
+  --header-bg: #6366f1;
+  --header-text: #fff;
+  --page-bg: #f8f9fb;
+  --panel-bg: #fff;
+  --panel-border: #e5e7eb;
+  --panel-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --text-color: #2e2e2e;
+  --secondary-text: #4b5563;
+  --label-color: #374151;
+  --input-bg: #fff;
+  --input-border: #d1d5db;
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+  --focus-ring: rgba(99,102,241,0.15);
+  --json-bg: #fafafa;
+}
+
+/* Dark Mode Overrides */
+.dark-mode {
+  --header-bg: #3f3d56;
+  --header-text: #fafafa;
+  --page-bg: #1e1e2f;
+  --panel-bg: #2c2c3f;
+  --panel-border: #3c3c52;
+  --panel-shadow: none;
+  --text-color: #e6e6eb;
+  --secondary-text: #b2b2c6;
+  --label-color: #d8d8e4;
+  --input-bg: #3a3a54;
+  --input-border: #5f5f7a;
+  --accent-color: #8b5cf6;
+  --accent-hover: #7c3aed;
+  --focus-ring: rgba(139,92,246,0.25);
+  --json-bg: #2e2e44;
+}
+
+/* ----------------------------------
+   BASE RESET & BODY
+----------------------------------- */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
-               "Helvetica Neue", Arial, sans-serif;
-  background-color: #f8f9fb;
-  color: #2e2e2e;
+  font-family: "Inter", sans-serif;
+  background-color: var(--page-bg);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
-/* HEADER */
+/* ----------------------------------
+   HEADER
+----------------------------------- */
 header {
-  background-color: #6366F1; /* Indigo */
-  color: #fff;
+  background-color: var(--header-bg);
+  color: var(--header-text);
   padding: 1rem;
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: background-color 0.3s;
+}
+header .header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1300px;
+  margin: 0 auto;
 }
 header h1 {
-  margin: 0;
   font-size: 1.8rem;
   font-weight: 600;
+  margin: 0;
+}
+#darkModeToggle {
+  background-color: var(--accent-color);
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+#darkModeToggle:hover {
+  background-color: var(--accent-hover);
 }
 
-/* MAIN CONTAINER (TOP ROW) */
+/* ----------------------------------
+   CONTAINER (TOP ROW: 2 columns)
+----------------------------------- */
 .container {
   display: grid;
   grid-template-columns: 300px 1fr;
-  grid-gap: 1.5rem;
+  gap: 1.5rem;
   max-width: 1300px;
   margin: 0 auto;
   padding: 1.5rem;
@@ -39,49 +104,50 @@ header h1 {
 
 /* PANEL (generic) */
 .panel {
-  background-color: #fff;
+  background-color: var(--panel-bg);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
   padding: 1rem;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 .panel h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
   font-weight: 600;
-  color: #2e2e2e;
 }
 
-/* --------------------------------------------------
-   AVAILABLE COMPONENTS (LEFT)
---------------------------------------------------- */
+/* ----------------------------------
+   AVAILABLE COMPONENTS
+----------------------------------- */
 .available-components {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   min-height: 50px;
 }
-
-/* Each item in Available list */
 .available-item {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.95rem;
-  cursor: grab; /* show a "grab" icon */
-  transition: background 0.2s, box-shadow 0.2s;
+  color: var(--text-color);
+  cursor: grab;
+  transition: background 0.2s;
 }
 .available-item:hover {
-  background: #f1f1f1;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  background-color: #f1f1f1;
+}
+.dark-mode .available-item:hover {
+  background-color: #4b4b62;
 }
 
-/* --------------------------------------------------
-   SELECTED COMPONENTS (RIGHT)
---------------------------------------------------- */
+/* ----------------------------------
+   SELECTED COMPONENTS
+----------------------------------- */
 .selected-panel {
   display: flex;
   flex-direction: column;
@@ -90,86 +156,103 @@ header h1 {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  min-height: 50px; /* some space if empty */
+  min-height: 50px;
 }
-
-/* Each item in Selected list */
 .selected-item {
-  background-color: #fff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 6px;
   padding: 0.75rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: grab;
+  align-items: flex-start;
+  flex-direction: column;
   transition: box-shadow 0.2s;
+  position: relative;
+  cursor: grab;
 }
 .selected-item:hover {
-  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-.selected-item span {
+.selected-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.selected-header span {
   font-weight: 500;
-  color: #4b5563;
+  color: var(--secondary-text);
 }
-
-/* Remove button inside Selected item */
 .remove-btn {
-  background: #fff;
-  border: 1px solid #d1d5db;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 4px;
   font-size: 0.8rem;
-  color: #4b5563;
+  color: var(--text-color);
   padding: 0.25rem 0.5rem;
   transition: background 0.2s;
+  cursor: pointer;
 }
 .remove-btn:hover {
-  background: #e5e7eb;
+  background-color: #e5e7eb;
+}
+.dark-mode .remove-btn:hover {
+  background-color: #4b4b62;
 }
 
-/* --------------------------------------------------
+/* Child container inside each item */
+.child-list {
+  margin-top: 0.5rem;
+  margin-left: 1rem; /* indentation for nested items */
+  border-left: 2px dashed var(--input-border);
+  padding-left: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ----------------------------------
    EXPORT BUTTON
---------------------------------------------------- */
+----------------------------------- */
 .export-btn {
-  background-color: #6366F1; /* Indigo */
+  background-color: var(--accent-color);
   color: #fff;
-  border: none;
   padding: 0.7rem 1.2rem;
   border-radius: 6px;
-  cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  text-transform: uppercase;
   margin-top: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-self: flex-start;
 }
 .export-btn:hover {
-  background-color: #4f46e5;
+  background-color: var(--accent-hover);
 }
 
-/* --------------------------------------------------
-   FORM EDITOR (BOTTOM)
---------------------------------------------------- */
+/* ----------------------------------
+   FORM EDITOR
+----------------------------------- */
 .form-editor {
   max-width: 1300px;
   margin: 0 auto;
   margin-top: 1rem;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow: var(--panel-shadow);
   padding: 1.5rem;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 .form-editor h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
   font-weight: 600;
-  color: #2e2e2e;
+  color: var(--text-color);
 }
-
-/* Each component's form card inside the form-editor */
 .component-form {
-  background: #fff; 
-  border: 1px solid #e5e7eb;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -184,10 +267,10 @@ header h1 {
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--secondary-text);
 }
 
-/* Field groups: label & input in columns */
+/* Field group: label+input in columns */
 .field-group {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -196,40 +279,42 @@ header h1 {
 }
 .field-group label {
   font-weight: 500;
-  color: #374151;
+  color: var(--label-color);
   align-self: center;
   margin-left: 0.25rem;
 }
 .field-group input[type="text"] {
-  padding: 0.6rem;
-  border: 1px solid #d1d5db;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 4px;
   font-size: 0.95rem;
-  color: #374151;
+  color: var(--text-color);
+  padding: 0.6rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .field-group input[type="text"]:focus {
-  border-color: #6366F1; 
-  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
-/* --------------------------------------------------
-   JSON OUTPUT PANEL (optional)
---------------------------------------------------- */
+/* ----------------------------------
+   JSON OUTPUT PANEL
+----------------------------------- */
 .json-output-panel {
   max-width: 1300px;
   margin: 1rem auto;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow: var(--panel-shadow);
   padding: 1.5rem;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 .json-output-panel h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
   font-weight: 600;
-  color: #2e2e2e;
+  color: var(--text-color);
 }
 #jsonOutput {
   width: 100%;
@@ -239,6 +324,6 @@ header h1 {
   font-family: monospace;
   min-height: 120px;
   white-space: pre-wrap;
-  background: #fafafa;
-  color: #2e2e2e;
+  background: var(--json-bg);
+  color: var(--text-color);
 }
