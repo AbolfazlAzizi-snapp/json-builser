@@ -24,3 +24,50 @@
     ]
   }
 ]
+
+{
+  "componentName": "meta-head",
+  "title": "Meta / Head Settings",
+  "fields": [
+    { "name": "title", "label": "Page Title", "type": "text" },
+    { "name": "description", "label": "Description", "type": "text" },
+    { "name": "url", "label": "Page URL", "type": "text" }
+  ],
+  "staticData": {
+    "ldJson": "",
+    "accentColor": "#FF00A6",
+    "headItems": [
+      {
+        "tag": "meta",
+        "property": "og:locale",
+        "content": "fa_IR"
+      },
+      {
+        "tag": "meta",
+        "property": "og:url",
+        "content": "https://snapp.ir/online-food-delivery/"
+      },
+      {
+        "tag": "meta",
+        "property": "og:image",
+        "content": "https://web-cdn.snapp.ir/snapp-website/images/food/order-no-cost.jpg"
+      },
+  {
+    "componentName": "faq",
+    "title": "FAQ Container",
+    "fields": [],
+    "arrayKey": "list", 
+    "allowedChildType": "faq-item"
+  },
+  {
+    "componentName": "faq-item",
+    "title": "FAQ Item (Q/A)",
+    "fields": [
+      { "name": "question", "label": "Question", "type": "text" },
+      { "name": "answer", "label": "Answer", "type": "text" }
+    ]
+  },
+    ]
+  }
+}
+
