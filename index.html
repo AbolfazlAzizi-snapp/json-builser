@@ -8,52 +8,64 @@
 <body>
 
   <header>
-    <h1>Landing Page JSON Builder</h1>
+    <!-- We add a container so we can place the title on the left 
+         and the dark mode toggle on the right -->
+    <div class="header-content">
+      <h1>Landing Page JSON Builder</h1>
+      <button id="darkModeToggle">Dark Mode</button>
+    </div>
   </header>
 
+  <!-- TOP ROW: Available vs. Selected -->
   <div class="container">
-    <!-- LEFT PANEL: AVAILABLE COMPONENTS -->
+    <!-- LEFT PANEL: Available Components -->
     <div class="panel">
       <h2>Available Components</h2>
       <div id="availableComponents" class="available-components">
-        <!-- Dynamically filled by JS -->
+        <!-- Populated by JS -->
       </div>
     </div>
 
-    <!-- RIGHT PANEL: SELECTED COMPONENTS -->
+    <!-- RIGHT PANEL: Selected Components -->
     <div class="panel selected-panel">
       <h2>Selected Components</h2>
       <div id="selectedList" class="selected-list">
-        <!-- Dynamically filled by JS -->
+        <!-- Populated by JS -->
       </div>
       <button class="export-btn" id="exportBtn">Export JSON</button>
     </div>
   </div>
 
-  <!-- FORM EDITOR (spans both columns) -->
+  <!-- BOTTOM ROW #1: Component Fields Panel -->
   <div class="form-editor" id="formEditor">
     <h2>Component Fields</h2>
     <div id="formsContainer"></div>
+  </div>
 
-    <!-- Optional: Show final JSON output here when user clicks Export -->
+  <!-- BOTTOM ROW #2: JSON Output Panel -->
+  <div class="json-output-panel">
+    <h2>JSON Output</h2>
     <pre id="jsonOutput"></pre>
   </div>
 
   <script>
-    /* 
-      Vanilla JS for:
-      1. Fetching 'components.json'
-      2. Rendering 'Available Components' as buttons
-      3. Letting user add multiple selected components
-      4. Reordering them (up/down)
-      5. Dynamically building form inputs
-      6. Exporting final JSON
-    */
+    // Dark Mode Toggle
+    const darkToggleBtn = document.getElementById('darkModeToggle');
+    darkToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      // Optional: update button text
+      if (document.body.classList.contains('dark-mode')) {
+        darkToggleBtn.textContent = 'Light Mode';
+      } else {
+        darkToggleBtn.textContent = 'Dark Mode';
+      }
+    });
 
+    // ------- Variables -------
     let componentsDefs = [];
-    let selectedComponents = []; // e.g. [{ definition, data }, ...]
+    let selectedComponents = []; // array of { definition: {...}, data: {...} }
 
-    // 1. Load the component definitions
+    // ------- Load Definitions -------
     fetch('./components.json')
       .then(res => res.json())
       .then(data => {
@@ -62,7 +74,7 @@
       })
       .catch(err => console.error('Error loading components.json:', err));
 
-    // Render "Available Components" as buttons
+    // Render "Available Components" (Left Panel)
     function renderAvailableComponents() {
       const container = document.getElementById('availableComponents');
       container.innerHTML = '';
@@ -78,16 +90,14 @@
     // Add a component to the selected list
     function addComponent(def) {
       const dataObj = {};
-      def.fields.forEach(f => {
-        dataObj[f.name] = ''; // default blank
-      });
-
+      def.fields.forEach(f => { dataObj[f.name] = ''; });
       selectedComponents.push({ definition: def, data: dataObj });
+
       renderSelectedList();
       renderForms();
     }
 
-    // Render the "Selected Components" list (right panel)
+    // Render the "Selected Components" (Right Panel)
     function renderSelectedList() {
       const listEl = document.getElementById('selectedList');
       listEl.innerHTML = '';
@@ -96,11 +106,9 @@
         const div = document.createElement('div');
         div.className = 'selected-item';
 
-        // Label: e.g., "1) hero-section"
         const span = document.createElement('span');
         span.textContent = (index + 1) + ') ' + item.definition.componentName;
 
-        // Action buttons (Up, Down, Remove)
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'actions';
 
@@ -132,18 +140,16 @@
 
     function moveComponentUp(index) {
       if (index === 0) return;
-      const temp = selectedComponents[index];
-      selectedComponents[index] = selectedComponents[index - 1];
-      selectedComponents[index - 1] = temp;
+      [selectedComponents[index - 1], selectedComponents[index]] =
+        [selectedComponents[index], selectedComponents[index - 1]];
       renderSelectedList();
       renderForms();
     }
 
     function moveComponentDown(index) {
       if (index === selectedComponents.length - 1) return;
-      const temp = selectedComponents[index];
-      selectedComponents[index] = selectedComponents[index + 1];
-      selectedComponents[index + 1] = temp;
+      [selectedComponents[index + 1], selectedComponents[index]] =
+        [selectedComponents[index], selectedComponents[index + 1]];
       renderSelectedList();
       renderForms();
     }
@@ -154,22 +160,20 @@
       renderForms();
     }
 
-    // Render the form fields for each selected component
+    // Render the form fields for each selected component (bottom "Component Fields" panel)
     function renderForms() {
       const container = document.getElementById('formsContainer');
       container.innerHTML = '';
 
       selectedComponents.forEach((item, idx) => {
-        // Card container
         const formDiv = document.createElement('div');
         formDiv.className = 'component-form';
 
-        // Title: e.g., "1) hero-section Fields"
         const title = document.createElement('h3');
         title.textContent = (idx + 1) + ') ' + item.definition.componentName + ' Fields';
         formDiv.appendChild(title);
 
-        // For each field in the component definition
+        // For each field, create a label + input
         item.definition.fields.forEach(field => {
           const fieldGroup = document.createElement('div');
           fieldGroup.className = 'field-group';
@@ -196,18 +200,13 @@
 
     // EXPORT JSON
     document.getElementById('exportBtn').addEventListener('click', () => {
-      // Build final JSON array
-      const outputArray = selectedComponents.map(item => ({
-        componentName: item.definition.componentName,
-        fields: { ...item.data }
+      const outputArray = selectedComponents.map(sc => ({
+        componentName: sc.definition.componentName,
+        fields: { ...sc.data }
       }));
 
-      // Example final structure
       const finalJson = { landingPage: outputArray };
-
-      // Show in <pre> block
-      const outputEl = document.getElementById('jsonOutput');
-      outputEl.textContent = JSON.stringify(finalJson, null, 2);
+      document.getElementById('jsonOutput').textContent = JSON.stringify(finalJson, null, 2);
     });
   </script>
 </body>
