@@ -1,6 +1,6 @@
-/* ----------------------------------
-   CSS VARIABLES FOR LIGHT & DARK
------------------------------------ */
+/* -----------------------
+   LIGHT vs DARK VARIABLES
+------------------------ */
 /* Default (Light Mode) */
 :root {
   --header-bg: #6366f1;
@@ -20,7 +20,7 @@
   --json-bg: #fafafa;
 }
 
-/* Dark Mode Overrides */
+/* Dark Mode */
 .dark-mode {
   --header-bg: #3f3d56;
   --header-text: #fafafa;
@@ -39,9 +39,7 @@
   --json-bg: #2e2e44;
 }
 
-/* ----------------------------------
-   BASE RESET & BODY
------------------------------------ */
+/* Reset & Body */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -54,18 +52,16 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* ----------------------------------
-   HEADER
------------------------------------ */
+/* HEADER */
 header {
   background-color: var(--header-bg);
   color: var(--header-text);
   padding: 1rem;
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: background-color 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-header .header-inner {
+.header-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -73,9 +69,9 @@ header .header-inner {
   margin: 0 auto;
 }
 header h1 {
+  margin: 0;
   font-size: 1.8rem;
   font-weight: 600;
-  margin: 0;
 }
 #darkModeToggle {
   background-color: var(--accent-color);
@@ -90,9 +86,7 @@ header h1 {
   background-color: var(--accent-hover);
 }
 
-/* ----------------------------------
-   CONTAINER (TOP ROW: 2 columns)
------------------------------------ */
+/* TWO-COLUMN LAYOUT */
 .container {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -102,7 +96,7 @@ header h1 {
   padding: 1.5rem;
 }
 
-/* PANEL (generic) */
+/* PANELS */
 .panel {
   background-color: var(--panel-bg);
   border-radius: 8px;
@@ -111,7 +105,7 @@ header h1 {
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 .panel h2 {
   font-size: 1.25rem;
@@ -119,9 +113,7 @@ header h1 {
   font-weight: 600;
 }
 
-/* ----------------------------------
-   AVAILABLE COMPONENTS
------------------------------------ */
+/* AVAILABLE LIST (LEFT) */
 .available-components {
   display: flex;
   flex-direction: column;
@@ -145,9 +137,7 @@ header h1 {
   background-color: #4b4b62;
 }
 
-/* ----------------------------------
-   SELECTED COMPONENTS
------------------------------------ */
+/* SELECTED LIST (RIGHT) */
 .selected-panel {
   display: flex;
   flex-direction: column;
@@ -158,28 +148,28 @@ header h1 {
   gap: 0.5rem;
   min-height: 50px;
 }
+
+/* Each selected item (FAQ container or other) */
 .selected-item {
   background-color: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 6px;
   padding: 0.75rem;
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
   transition: box-shadow 0.2s;
-  position: relative;
   cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 .selected-item:hover {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .selected-header {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.selected-header span {
+.selected-header .title {
   font-weight: 500;
   color: var(--secondary-text);
 }
@@ -190,8 +180,8 @@ header h1 {
   font-size: 0.8rem;
   color: var(--text-color);
   padding: 0.25rem 0.5rem;
-  transition: background 0.2s;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .remove-btn:hover {
   background-color: #e5e7eb;
@@ -200,10 +190,9 @@ header h1 {
   background-color: #4b4b62;
 }
 
-/* Child container inside each item */
+/* Child zone inside an FAQ container (if needed) */
 .child-list {
-  margin-top: 0.5rem;
-  margin-left: 1rem; /* indentation for nested items */
+  margin-left: 1rem;
   border-left: 2px dashed var(--input-border);
   padding-left: 0.5rem;
   display: flex;
@@ -211,9 +200,7 @@ header h1 {
   gap: 0.5rem;
 }
 
-/* ----------------------------------
-   EXPORT BUTTON
------------------------------------ */
+/* EXPORT BUTTON */
 .export-btn {
   background-color: var(--accent-color);
   color: #fff;
@@ -224,15 +211,12 @@ header h1 {
   margin-top: 1rem;
   cursor: pointer;
   transition: background-color 0.2s;
-  align-self: flex-start;
 }
 .export-btn:hover {
   background-color: var(--accent-hover);
 }
 
-/* ----------------------------------
-   FORM EDITOR
------------------------------------ */
+/* FORM EDITOR */
 .form-editor {
   max-width: 1300px;
   margin: 0 auto;
@@ -242,7 +226,6 @@ header h1 {
   border-radius: 8px;
   box-shadow: var(--panel-shadow);
   padding: 1.5rem;
-  transition: background-color 0.3s, border-color 0.3s;
 }
 .form-editor h2 {
   font-size: 1.25rem;
@@ -270,7 +253,7 @@ header h1 {
   color: var(--secondary-text);
 }
 
-/* Field group: label+input in columns */
+/* Label & Input in columns */
 .field-group {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -281,7 +264,6 @@ header h1 {
   font-weight: 500;
   color: var(--label-color);
   align-self: center;
-  margin-left: 0.25rem;
 }
 .field-group input[type="text"] {
   background-color: var(--input-bg);
@@ -290,16 +272,13 @@ header h1 {
   font-size: 0.95rem;
   color: var(--text-color);
   padding: 0.6rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
 .field-group input[type="text"]:focus {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
-/* ----------------------------------
-   JSON OUTPUT PANEL
------------------------------------ */
+/* JSON OUTPUT PANEL */
 .json-output-panel {
   max-width: 1300px;
   margin: 1rem auto;
@@ -308,7 +287,6 @@ header h1 {
   border-radius: 8px;
   box-shadow: var(--panel-shadow);
   padding: 1.5rem;
-  transition: background-color 0.3s, border-color 0.3s;
 }
 .json-output-panel h2 {
   font-size: 1.25rem;
@@ -323,7 +301,7 @@ header h1 {
   padding: 1rem;
   font-family: monospace;
   min-height: 120px;
-  white-space: pre-wrap;
   background: var(--json-bg);
   color: var(--text-color);
+  white-space: pre-wrap;
 }
