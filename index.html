@@ -2,41 +2,227 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Landing Page Builder</title>
+  <title>Landing Page JSON Builder</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <header>
-    <h1>Landing Page Builder</h1>
+    <h1>Landing Page JSON Builder</h1>
   </header>
 
   <div class="container">
-    <!-- Sidebar: Available Components -->
-    <aside class="sidebar">
+    <!-- LEFT PANEL: AVAILABLE COMPONENTS -->
+    <div class="panel">
       <h2>Available Components</h2>
-      <div id="available-components">
-        <!-- Will be dynamically populated by script.js -->
+      <div id="availableComponents" class="available-components">
+        <!-- Dynamically filled by JS -->
       </div>
-    </aside>
+    </div>
 
-    <!-- Main Area: Form Editor + Preview -->
-    <main class="main-area">
-      <section id="form-section" class="form-section">
-        <h2>Component Fields</h2>
-        <div id="form-editor">
-          <!-- Fields for the selected component appear here -->
-        </div>
-        <button id="btn-generate">Generate JSON</button>
-      </section>
-
-      <section class="output-section">
-        <h2>JSON Output</h2>
-        <textarea id="json-output" readonly rows="10"></textarea>
-      </section>
-    </main>
+    <!-- RIGHT PANEL: SELECTED COMPONENTS -->
+    <div class="panel selected-panel">
+      <h2>Selected Components</h2>
+      <div id="selectedList" class="selected-list">
+        <!-- Dynamically filled by JS -->
+      </div>
+      <button class="export-btn" id="exportBtn">Export JSON</button>
+    </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- FORM EDITOR (spans both columns) -->
+  <div id="formEditor" class="form-editor">
+    <h2>Component Fields</h2>
+    <!-- Each selected component's form will appear here -->
+    <div id="formsContainer"></div>
+    
+    <!-- (Optional) Show final JSON output here, or use a popup. -->
+    <pre id="jsonOutput"></pre>
+  </div>
+
+  <script>
+    // Global data
+    let componentsDefs = [];
+    let selectedComponents = []; // array of { definition: {componentName, fields[]}, data: {} }
+
+    // Fetch the component definitions from 'components.json'
+    fetch('./components.json')
+      .then(res => res.json())
+      .then(data => {
+        componentsDefs = data;
+        renderAvailableComponents();
+      })
+      .catch(err => console.error('Error loading components.json:', err));
+
+    // -------------------------
+    // RENDER AVAILABLE COMPONENTS
+    // -------------------------
+    function renderAvailableComponents() {
+      const container = document.getElementById('availableComponents');
+      container.innerHTML = '';
+
+      componentsDefs.forEach(def => {
+        const btn = document.createElement('button');
+        btn.textContent = def.componentName;
+        btn.addEventListener('click', () => addComponent(def));
+        container.appendChild(btn);
+      });
+    }
+
+    // -------------------------
+    // ADD COMPONENT TO SELECTED LIST
+    // -------------------------
+    function addComponent(def) {
+      // Initialize empty data object for fields
+      const dataObj = {};
+      def.fields.forEach(f => {
+        dataObj[f.name] = '';
+      });
+
+      // Store in selectedComponents
+      selectedComponents.push({ definition: def, data: dataObj });
+      renderSelectedList();
+      renderForms();
+    }
+
+    // -------------------------
+    // RENDER SELECTED COMPONENTS LIST
+    // -------------------------
+    function renderSelectedList() {
+      const listEl = document.getElementById('selectedList');
+      listEl.innerHTML = '';
+
+      selectedComponents.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'selected-item';
+
+        // Label with index + component name
+        const span = document.createElement('span');
+        span.textContent = (index + 1) + ') ' + item.definition.componentName;
+
+        // Up/Down/Remove
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'actions';
+
+        // Move Up
+        const btnUp = document.createElement('button');
+        btnUp.textContent = '↑';
+        btnUp.disabled = (index === 0); // Can't move up if first
+        btnUp.addEventListener('click', () => moveComponentUp(index));
+        actionsDiv.appendChild(btnUp);
+
+        // Move Down
+        const btnDown = document.createElement('button');
+        btnDown.textContent = '↓';
+        btnDown.disabled = (index === selectedComponents.length - 1); // Can't move down if last
+        btnDown.addEventListener('click', () => moveComponentDown(index));
+        actionsDiv.appendChild(btnDown);
+
+        // Remove
+        const btnRemove = document.createElement('button');
+        btnRemove.textContent = 'Remove';
+        btnRemove.addEventListener('click', () => removeComponent(index));
+        actionsDiv.appendChild(btnRemove);
+
+        div.appendChild(span);
+        div.appendChild(actionsDiv);
+
+        listEl.appendChild(div);
+      });
+    }
+
+    // Move item up
+    function moveComponentUp(index) {
+      if (index === 0) return; 
+      const temp = selectedComponents[index];
+      selectedComponents[index] = selectedComponents[index - 1];
+      selectedComponents[index - 1] = temp;
+      renderSelectedList();
+      renderForms();
+    }
+
+    // Move item down
+    function moveComponentDown(index) {
+      if (index === selectedComponents.length - 1) return;
+      const temp = selectedComponents[index];
+      selectedComponents[index] = selectedComponents[index + 1];
+      selectedComponents[index + 1] = temp;
+      renderSelectedList();
+      renderForms();
+    }
+
+    // Remove item
+    function removeComponent(index) {
+      selectedComponents.splice(index, 1);
+      renderSelectedList();
+      renderForms();
+    }
+
+    // -------------------------
+    // RENDER FORM EDITOR
+    // -------------------------
+    function renderForms() {
+      const container = document.getElementById('formsContainer');
+      container.innerHTML = '';
+
+      selectedComponents.forEach((item, idx) => {
+        // item.definition, item.data
+        const formDiv = document.createElement('div');
+        formDiv.className = 'component-form';
+
+        const title = document.createElement('h3');
+        title.textContent = (idx + 1) + ') ' + item.definition.componentName + ' Fields';
+        formDiv.appendChild(title);
+
+        // For each field in definition
+        item.definition.fields.forEach(field => {
+          const fieldGroup = document.createElement('div');
+          fieldGroup.className = 'field-group';
+
+          const label = document.createElement('label');
+          label.textContent = field.label;
+          fieldGroup.appendChild(label);
+
+          const input = document.createElement('input');
+          input.type = field.type || 'text';
+          input.value = item.data[field.name];
+          input.placeholder = 'Enter ' + field.label;
+          input.addEventListener('input', (e) => {
+            // Update the data in selectedComponents
+            item.data[field.name] = e.target.value;
+          });
+
+          fieldGroup.appendChild(input);
+          formDiv.appendChild(fieldGroup);
+        });
+
+        container.appendChild(formDiv);
+      });
+    }
+
+    // -------------------------
+    // EXPORT JSON
+    // -------------------------
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      // Build final JSON array of components, preserving order
+      const outputArray = selectedComponents.map(item => ({
+        componentName: item.definition.componentName,
+        fields: { ...item.data }
+      }));
+
+      // For demonstration, let's put it in an object
+      const finalJson = {
+        landingPage: outputArray
+      };
+
+      // Display in a <pre> or console
+      const outputEl = document.getElementById('jsonOutput');
+      outputEl.textContent = JSON.stringify(finalJson, null, 2);
+
+      // Alternatively, could copy to clipboard or show in a modal
+      // console.log(finalJson);
+    });
+  </script>
+
 </body>
 </html>
