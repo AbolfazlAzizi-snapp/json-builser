@@ -68,3 +68,57 @@ function generateJSON() {
   const outputTextarea = document.getElementById('json-output');
   outputTextarea.value = JSON.stringify(outputObj, null, 2);
 }
+
+
+  // Listen for clicks on the "Open Draft Mode" button
+  const draftModeBtn = document.getElementById('draftModeBtn');
+  const draftUrlInput = document.getElementById('draftUrlInput');
+
+  draftModeBtn.addEventListener('click', () => {
+    const userUrl = draftUrlInput.value.trim();
+    
+    if (!userUrl) {
+      alert('Please enter a URL first.');
+      return;
+    }
+
+    // Build the new URL by appending /?draftMode
+    let finalUrl;
+    if (userUrl.endsWith('/')) {
+      finalUrl = userUrl + '?draftMode';
+    } else {
+      finalUrl = userUrl + '/?draftMode';
+    }
+
+    /* 
+    ----------------------------
+    A) Open the new URL in a tab
+    ----------------------------
+    */
+    window.open(finalUrl, '_blank');
+
+
+    /*
+    ------------------------------------------------------------
+    B) If you need to FETCH data from that URL (instead of open):
+    ------------------------------------------------------------
+    */
+    /*
+    fetch(finalUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Error fetching: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Draft Mode data:', data);
+        // do something with the fetched data...
+        // e.g. display it in your JSON output panel
+        // document.getElementById('jsonOutput').textContent =
+        //   JSON.stringify(data, null, 2);
+      })
+      .catch(err => console.error('Error fetching draft data:', err));
+    */
+  });
+</script>
